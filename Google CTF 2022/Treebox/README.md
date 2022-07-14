@@ -64,14 +64,14 @@ This means that the challenge must be solved by:
 1. Somehow managing to read the flag file without using calls or import statements (unlikely)
 2. Figuring out a way to fool ```ast``` by calling functions indirectly, so it won't notice the function calls made by the program
 
-As far as I know, it's impossible to access the file system or the shell without invoking any functions, so I tried to change the angle of thinking about this challenge to the second way.
+As far as we know, it's impossible to access the file system or the shell without invoking any functions, so we tried to change the angle of thinking about this challenge to the second way.
 
-I needed to find the 'trickable' part of the program, as a chain is only as strong as its weakest link.
+We needed to find the 'trickable' part of the program, as a chain is only as strong as its weakest link.
 A few options come to mind:
 1. Python's match-case
 2. ast parser
 
-I didn't believe Python's match-case to be the weak part, as that would be a fatal flaw in Python itself, and probably not the intention of the challenge authors anyway (even though it is *possible*, see Python2's ```input()``` RCE vulnerability).
+We didn't believe Python's match-case to be the weak part, as that would be a fatal flaw in Python itself, and probably not the intention of the challenge authors anyway (even though it is *possible*, see Python2's ```input()``` RCE vulnerability).
 
 That leaves tricking the ast parser by calling functions indirectly (without invoking them using parentheses).
 
@@ -81,7 +81,7 @@ One way to achieve indirect function calls, is dunder (double underscore) method
 
 ## Constructing a Solution Payload
 At first, this doesn't seem to be of much help - to create an object (and invoke ```__init__``` or another dunder method).
-After putting some thought into it, I came to realize that exceptions are classes too! A quick check reveals that it is possible to raise exceptions without any arguments.
+After putting some thought into it, we came to realize that exceptions are classes too! A quick check reveals that it is possible to raise exceptions without any arguments.
 Meaning:
 
 ```raise Exception``` is allowed, but ```raise Exception("Can I pass an argument?")``` would match to ```ast.Call```.
@@ -102,7 +102,7 @@ class CustomException(Exception):
 
 At this point, there are several approaches to what dunder method to use to inderectly call a function. One of the most common ones is to overload one of the operators, for example, the plus operator (+) using the ```__add__``` method.
 
-My team and I chose to use ```__getitem__```.
+We chose to use ```__getitem__```.
 ```__getitem__``` is the function that is being called when looking for a value that matches a key in a dictionary.
 
 For instance, in the following code snippet, ```__getitem__``` is called to retrieve the value matching the key 'a':
@@ -123,6 +123,7 @@ try:
 	raise CustomException
 except CustomException as e:
 	e["/bin/sh"]
+--END
 ```
 Which will end up executing: ```os.system("/bin/sh")```, providing us an unlimited shell.
 ```bash
@@ -130,5 +131,5 @@ $ cat flag
 CTF{CzeresniaTopolaForsycja}
 ```
 
-**P.S.** This challenge is probably the only time I was *delighted* to see an exception, instead of being frustrated :)
+**P.S.** This challenge is probably the only time we were *delighted* to see an exception, instead of being frustrated :)
 
