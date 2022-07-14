@@ -130,5 +130,5 @@ $ cat flag
 CTF{CzeresniaTopolaForsycja}
 ```
 
-**P.S.**: This challenge is probably the only time I was *delighted* to see an exception, instead of being frustrated :)
+**P.S.** This challenge is probably the only time I was *delighted* to see an exception, instead of being frustrated :)
 
