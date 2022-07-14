@@ -1,1 +1,1 @@
-CTF{the_flag}
+CTF{CzeresniaTopolaForsycja}
