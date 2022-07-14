@@ -57,7 +57,7 @@ Essentially, both functions calls and import statements are banned, because they
 
 Notice how the input is being compiled (and executed if it passes ```verify_secure```) without any change to the available modules or builtins. This means that we have access to all of the variables and modules in the original program, including: ```os```, ```sys```, and ```ast```. We will exploit this later on.
 
-Also, the program uses structured pattern matching, so we know that it is running on Python 3.10+
+Also, the program uses structural pattern matching, so we know that it is running on Python 3.10+
 
 ## Thought Process
 
