@@ -133,4 +133,4 @@ CTF{CzeresniaTopolaForsycja}
 
 **P.S.** This challenge is probably the only time we were *delighted* to see an exception, instead of being frustrated :)
 
-*Writeup by C0d3 Bre4k3rs: 5h4d0w, N04M1st3r*
+*Writeup by C0d3 Bre4k3rs: 5h4d0w (Om3rR3ich), N04M1st3r*
