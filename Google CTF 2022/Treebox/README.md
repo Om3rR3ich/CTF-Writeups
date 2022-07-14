@@ -64,7 +64,40 @@ This means that the challenge must be solved by:
 1. Somehow managing to read the flag file without using calls or import statements (unlikely)
 2. Figuring out a way to fool ```ast``` by calling functions indirectly, so it won't notice the function calls made by the program
 
+As far as I know, it's impossible to access the file system or the shell without invoking any functions, so I tried to change the angle of thinking about this challenge to the second way.
 
+I needed to find the 'trickable' part of the program, as a chain is only as strong as its weakest link.
+A few options come to mind:
+1. Python's match-case
+2. ast parser
 
+I didn't believe Python's match-case to be the weak part, as that would be a fatal flaw in Python itself, and probably not the intention of the challenge authors anyway (even though it is *possible*, see Python2's ```input()``` RCE vulnerability).
+
+That leaves tricking the ast parser by calling functions indirectly (without invoking them using parentheses).
+
+## Dunder Methods To the Rescue!
+
+One way to achieve indirect function calls, is dunder (double underscore) methods. These are functions that help creating classes in Python, and are normally used in order to make contructors, overload operators change the behavior of Python built-in functions on the classe's objects, and more.
+
+## Constructing a Solution Payload
+At first, this doesn't seem to be of much help - to create an object (and invoke \_\_init__ or another dunder method).
+After putting some thought into it, I came to realize that exceptions are classes too! A quick check reveals that it is possible to raise exceptions without any arguments.
+Meaning:
+
+```raise Exception``` is allowed, but ```raise Exception("Can I pass an argument?")``` would match to ```ast.Call```.
+
+Knowing all of this, we can create (and raise) a custom exception (a class that inherits from ```Exception```), catch the exception
+and get access to the exception object, already equipped with the dunder method we created.
+
+So our theoretical payload would look something like this:
+```python
+class CustomException(Exception):
+  pass # TODO: add a dunder method to use when handling the exception
+  
+ try:
+   raise CustomException
+ except CustomException as e:
+   pass # use the exception object (e)
+```
 
 
