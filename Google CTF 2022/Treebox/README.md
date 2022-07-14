@@ -55,7 +55,9 @@ that uses the ```ast``` library (**A**bstract **S**yntax **T**rees) to parse the
 
 Essentially, both functions calls and import statements are banned, because they match either of ```ast.Call, ast.Import, ast.ImportFrom```
 
-Note: The program uses structured pattern matching, so we know that it is running on Python 3.10+
+Notice how the input is being compiled (and executed if it passes ```verify_secure```) without any change to the available modules or builtins. This means that we have access to ```os```, ```sys```, and ```ast```. We will exploit this later on.
+
+Also, the program uses structured pattern matching, so we know that it is running on Python 3.10+
 
 ## Thought Process
 
