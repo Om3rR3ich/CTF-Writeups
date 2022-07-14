@@ -5,6 +5,8 @@
 
 **Description**: I think I finally got Python sandboxing right.
 
+![treeBoxImg](https://user-images.githubusercontent.com/80763028/178986252-7533e86c-db02-47ca-b146-ad5584c6a692.jpg)
+
 The challenge was a pyjail-style sandbox, that needed to "escaped" from - regain the ability to execute arbitrary code (and read the flag file) given a VERY restrictive environment. As usual with pyjails, the source code was provided:
 
 ```python
