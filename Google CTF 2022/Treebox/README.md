@@ -84,7 +84,7 @@ That leaves tricking the ast parser by calling functions indirectly (without inv
 One way to achieve indirect function calls, is dunder (double underscore) methods. These are functions that help creating classes in Python, and are normally used in order to make contructors, overload operators change the behavior of Python built-in functions on the classe's objects, and more.
 
 ## Constructing a Solution Payload
-At first, this doesn't seem to be of much help - to create an object (and invoke ```__init__``` or another dunder method).
+At first, this doesn't seem to be of much help - to create an object (and invoke ```__init__``` or another dunder method), you still need to use a call.
 After putting some thought into it, we came to realize that exceptions are classes too! A quick check reveals that it is possible to raise exceptions without any arguments.
 Meaning:
 
