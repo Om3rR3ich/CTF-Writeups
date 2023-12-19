@@ -142,7 +142,7 @@ That's the flag!
 You may wonder why the flag didn't show up in the result of the keystrokes dump. 
 The most plausible explanation I can think of is that another person (not the one who's controlling the computer over VNC) typed this message.
 
-## Addeundum
+## Addendum
 Networking, as a subject, tends to be greyer than a group of mice (apparently called a 'mischief') covered in gravel on a winter day (i.e. boring).
 
 However, this challenge, although frustrating, was actually fun to solve. It puts the player in a detective role,
