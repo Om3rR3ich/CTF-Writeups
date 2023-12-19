@@ -146,7 +146,7 @@ The most plausible explanation I can think of is that another person (not the on
 Networking, as a subject, tends to be greyer than a group of mice (apparently called a 'mischief') covered in gravel on a winter day (i.e. boring).
 
 However, this challenge, although frustrating, was actually fun to solve. It puts the player in a detective role,
-and challenge feels like an adventure (rather than an endless day at an office, doing the type of work that makes you burn out after a year, which is how most networking related tasks are).
+and challenge feels like an adventure (rather than an endless day at an office, doing the type of work that makes you burn out after a year, which is how most networking related tasks feel like).
 
 In my opinion, the lesson here is that adding backstory (even just a little, like the "nick dread pirate" thing) to challenges makes them much more interesting and rewarding to solve,
 and also, not to judge a CTF challenge by its category ;)
