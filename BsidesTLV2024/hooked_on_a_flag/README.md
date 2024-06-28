@@ -144,4 +144,224 @@ The result is rather disappointing:
     }
 ```
 
+Basic encoding aside, the encryption mechanism hides behind `utility.m6842a().encrypt`, which isn't present in the decompiled Java source code!
 
+Rather than panicking, remember the Java Native Interface (JNI) - a framework that enables to incorporate native (C/C++) code into a Java application.
+
+Indeed, we find the smoking gun in the definition of the `utility` class:
+```Java
+public class utility {
+
+    /* renamed from: a */
+    public static utility f4517a = null;
+
+    public native int decrypt(byte[] bArr, int i, String str, String str2, byte[] bArr2, byte[] bArr3);
+
+    public native int encrypt(String str, int i, String str2, String str3, byte[] bArr, byte[] bArr2);
+```
+
+Considering this information, we expect to find a shared object (`libUtility.so`) packed inside the apk file.
+There are two possible approaches to a final solution - 
+1. Use Frida to call the `decrypt` function with the encrypted flag and tag (probably the intended solution considering the challenge's name)
+2. Reverse engineer `libUtility.so` to understand what `encrypt` is doing, and use this knowledge to decrypt the flag (which is what I did)
+
+As per the JNI naming convention, `encrypt` will probably be called `Java_{PACKAGE_NAME}_utility_encrypt` (unless obfuscated).
+Decompiling that (I used IDA Pro), we get:
+
+```c
+__int64 __fastcall Java_com_example_addflag_utility_encrypt(
+        __int64 a1,
+        __int64 a2,
+        __int64 a3,
+        unsigned int a4,
+        __int64 a5,
+        __int64 a6,
+        __int64 a7,
+        __int64 a8)
+{
+  __int64 v10; // r15
+  const char *v12; // rbp
+  int v13; // ecx
+  void *v14; // rax
+  __int64 v15; // rsi
+  __int64 v16; // rax
+  __int64 v17; // r15
+  __int64 v18; // rax
+  char *v19; // r13
+  int v20; // ebp
+  int v21; // ebx
+  unsigned int v22; // ebx
+  void *v23; // r15
+  int v25; // [rsp+4h] [rbp-A4h] BYREF
+  __int64 v26; // [rsp+8h] [rbp-A0h]
+  __int64 v27; // [rsp+10h] [rbp-98h]
+  __int64 v28; // [rsp+18h] [rbp-90h]
+  void *ptr; // [rsp+20h] [rbp-88h]
+  const char *v30; // [rsp+28h] [rbp-80h]
+  __int64 v31; // [rsp+30h] [rbp-78h]
+  __int64 v32; // [rsp+38h] [rbp-70h]
+  __int128 v33; // [rsp+40h] [rbp-68h] BYREF
+  char v34[88]; // [rsp+50h] [rbp-58h] BYREF
+
+  v10 = a4;
+  v27 = (*(__int64 (__fastcall **)(__int64, __int64, _QWORD))(*(_QWORD *)a1 + 1352LL))(a1, a3, 0LL);
+  v12 = (const char *)(*(__int64 (__fastcall **)(__int64, __int64, _QWORD))(*(_QWORD *)a1 + 1352LL))(a1, a5, 0LL);
+  v28 = (*(__int64 (__fastcall **)(__int64, __int64, _QWORD))(*(_QWORD *)a1 + 1352LL))(a1, a6, 0LL);
+  v26 = v10;
+  v13 = v10 + 31;
+  if ( (int)v10 + 16 >= 0 )
+    v13 = v10 + 16;
+  v14 = calloc(1uLL, (int)(v13 & 0xFFFFFFF0));
+  if ( v14 )
+  {
+    ptr = v14;
+    v32 = a3;
+    v33 = 0LL;
+    v15 = strlen(v12);
+    sub_1D70((__int64)v12, v15, (__int64)v34);
+    v16 = EVP_CIPHER_CTX_new();
+    if ( !v16 )
+    {
+      ERR_print_errors_fp(stderr);
+      abort();
+    }
+    v17 = v16;
+    v18 = EVP_aes_256_gcm();
+    if ( (unsigned int)EVP_EncryptInit_ex(v17, v18, 0LL, v34, v28) != 1 )
+    {
+      ERR_print_errors_fp(stderr);
+      abort();
+    }
+    v30 = v12;
+    v31 = a5;
+    v19 = (char *)ptr;
+    if ( (unsigned int)EVP_EncryptUpdate(v17, ptr, &v25, v27, v26) != 1 )
+    {
+      ERR_print_errors_fp(stderr);
+      abort();
+    }
+    v20 = v25;
+    if ( (unsigned int)EVP_EncryptFinal_ex(v17, &v19[v25], &v25) != 1 )
+    {
+      ERR_print_errors_fp(stderr);
+      abort();
+    }
+    v26 = a6;
+    v21 = v25;
+    if ( (unsigned int)EVP_CIPHER_CTX_ctrl(v17, 16LL, 16LL, &v33) != 1 )
+    {
+      ERR_print_errors_fp(stderr);
+      abort();
+    }
+    v22 = v20 + v21;
+    EVP_CIPHER_CTX_free(v17);
+    v23 = ptr;
+    (*(void (__fastcall **)(__int64, __int64, _QWORD, _QWORD, void *))(*(_QWORD *)a1 + 1664LL))(a1, a7, 0LL, v22, ptr);
+    (*(void (__fastcall **)(__int64, __int64, _QWORD, __int64, __int128 *))(*(_QWORD *)a1 + 1664LL))(
+      a1,
+      a8,
+      0LL,
+      16LL,
+      &v33);
+    (*(void (__fastcall **)(__int64, __int64, __int64))(*(_QWORD *)a1 + 1360LL))(a1, v32, v27);
+    (*(void (__fastcall **)(__int64, __int64, const char *))(*(_QWORD *)a1 + 1360LL))(a1, v31, v30);
+    (*(void (__fastcall **)(__int64, __int64, __int64))(*(_QWORD *)a1 + 1360LL))(a1, v26, v28);
+    free(v23);
+  }
+  else
+  {
+    (*(void (__fastcall **)(__int64, __int64, __int64))(*(_QWORD *)a1 + 1360LL))(a1, a3, v27);
+    (*(void (__fastcall **)(__int64, __int64, const char *))(*(_QWORD *)a1 + 1360LL))(a1, a5, v12);
+    (*(void (__fastcall **)(__int64, __int64, __int64))(*(_QWORD *)a1 + 1360LL))(a1, a6, v28);
+    return (unsigned int)-1;
+  }
+  return v22;
+}
+```
+
+It's clear that AES-GCM 256 bit is used. 
+This time, it's not hardcoded, but passed as a parameter to the `encrypt` function (AES is symmetric so the encryption key is also the decryption key).
+Fortunately, the library uses the well known and documented OpenSSL functions (rather than a custom implementation), so the parameters and conventions are readily avilable:
+```c
+int EVP_EncryptInit_ex(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
+                       ENGINE *impl, const unsigned char *key, const unsigned char *iv);
+```
+
+So the key and IV are the last two parameters, in our case they're `v34` and `v28` respectively.
+With a little bit of analysis (combined with the previous analysis of the apk) we find that key and IV that are passed
+by the application are the other two strings we found previously in the shared preferences.
+
+While the IV (`string_1`) is 12 bytes as expected, the supposed key is only 30 bytes (as opposed to the required size of 32 bytes).
+Occam's razor may tempt us to just try random paddings until something works, but all such attempts are (in this case) futile.
+
+If you bother re-checking the `encrypt` method inside `libUtility.so`, you can see that the key parameter is being preprocessed by the `sub_1D70` function
+(check line 50: ```sub_1D70((__int64)v12, v15, (__int64)v34);```).
+Hmmm, what is that for?
+
+```c
+__int64 __fastcall sub_1D70(__int64 a1, __int64 a2, __int64 a3)
+{
+  __int64 v4; // rax
+  __int64 v5; // rbx
+  __int64 v6; // rax
+  __int64 v8[5]; // [rsp+0h] [rbp-28h] BYREF
+
+  v8[0] = 32LL;
+  v4 = EVP_MD_CTX_new(a1);
+  if ( !v4 )
+  {
+    ERR_print_errors_fp(stderr);
+    abort();
+  }
+  v5 = v4;
+  v6 = EVP_sha256();
+  if ( (unsigned int)EVP_DigestInit_ex(v5, v6, 0LL) != 1 )
+  {
+    ERR_print_errors_fp(stderr);
+    abort();
+  }
+  if ( (unsigned int)EVP_DigestUpdate(v5, a1, a2) != 1 )
+  {
+    ERR_print_errors_fp(stderr);
+    abort();
+  }
+  if ( (unsigned int)EVP_DigestFinal_ex(v5, a3, v8) != 1 )
+  {
+    ERR_print_errors_fp(stderr);
+    abort();
+  }
+  return EVP_MD_CTX_free(v5);
+}
+```
+
+This function appears to calculate the sha256 of the key (and use that as a key instead).
+Hence the real key isn't `8[V3@eL521#@R2XNX3?4vygXw4$2Jr`, but `sha256("8[V3@eL521#@R2XNX3?4vygXw4$2Jr")`.
+
+This makes sense, because the output of sha256 is always 256 bits = 32 bytes.
+
+Based on this information, I put together a quick Python script to decrypt the flag:
+
+```python
+from Crypto.Cipher import AES
+from hashlib import sha256
+import base64
+
+key = b'8[V3@eL521#@R2XNX3?4vygXw4$2Jr'
+key = sha256(key).digest()
+
+iv = b'Fh@S/xW]y$?q'
+
+ciphertext = base64.b64decode(b'l5wMg7HQCuXMk3Dkf3GDlLX52+VM0bZcDCQIZjyVJlKZ3hh9LMIUY13zzlgimU3IAAAAAAAAAAAAAAAAAAAAAA==')
+
+aes = AES.new(key, AES.MODE_GCM, iv)
+print(aes.decrypt(ciphertext))
+```
+
+Running it results in:
+`b'BSidesTLV2024{4ndr01d_dc0mp1l3_4nd_h00k_15_fun!}\x14\x05\xbb\xdbyy\xa5\xc3WT\x19C\xd5\x9a7E'`
+
+
+## Addendum
+It was cool to see that an android challenge was included in BsidesTLV.
+Nevertheless, it was little disappointing that it was the only one, especially considering its difficulty.
+Hopefully there will be more challenging tasks next year!
