@@ -281,7 +281,7 @@ __int64 __fastcall Java_com_example_addflag_utility_encrypt(
 
 It's clear that AES-GCM 256 bit is used. 
 This time, it's not hardcoded, but passed as a parameter to the `encrypt` function (AES is symmetric so the encryption key is also the decryption key).
-Fortunately, the library uses the well known and documented OpenSSL functions (rather than a custom implementation), so the parameters and conventions are readily avilable:
+Fortunately, the library uses the well known and documented OpenSSL functions (rather than a custom implementation), so the parameters and conventions are readily available:
 ```c
 int EVP_EncryptInit_ex(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
                        ENGINE *impl, const unsigned char *key, const unsigned char *iv);
